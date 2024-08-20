@@ -52,14 +52,16 @@ MyFirstController::MyFirstController(mc_rbdyn::RobotModulePtr rm, double dt, con
         {"LSC", {-4.52962e-05}}, {"LSP", {1.04471}}, {"LSR", {-0.34793}}, {"LSY", {-0.0834915}}, {"LEP", {-1.83162}}, {"LWRY", {-0.000505652}}, {"LWRR", {-0.697133}}, {"LWRP", {0.00133077}}, {"LHDY", {-6.02042e-05}}
     };
 
-  dynamicsConstraint = mc_rtc::unique_ptr<mc_solver::DynamicsConstraint>(new mc_solver::DynamicsConstraint(robots(), robot().robotIndex(), solver().dt(), {0.1, 0.01, 0.5}, 1.0, false, true));
+  MyDynamicsConstraint = mc_rtc::unique_ptr<mc_solver::DynamicsConstraint>(new mc_solver::DynamicsConstraint(robots(), robot().robotIndex(), solver().dt(), {0.1, 0.01, 0.5}, 1.0, false, true));
   config_.load(config);
-  contactConstraint = mc_rtc::unique_ptr<mc_solver::ContactConstraint>(new mc_solver::ContactConstraint(timeStep, mc_solver::ContactConstraint::ContactType::Acceleration));
+  //contactConstraint = mc_rtc::unique_ptr<mc_solver::ContactConstraint>(new mc_solver::ContactConstraint(timeStep, mc_solver::ContactConstraint::ContactType::Acceleration));
   solver().addConstraintSet(contactConstraint);
-  solver().addConstraintSet(dynamicsConstraint);
+  //solver().addConstraintSet(MyDynamicsConstraint);
   addContact({robot().name(), "ground", "LeftFoot", "AllGround"});
   addContact({robot().name(), "ground", "RightFoot", "AllGround"});
-  postureTask = std::make_shared<mc_tasks::PostureTask>(solver(), robot().robotIndex(), 10, 1000);
+  //postureTask = std::make_shared<mc_tasks::PostureTask>(solver(), robot().robotIndex(), 10, 1000);
+  postureTask->weight(1000);
+  postureTask->stiffness(10);
   solver().addTask(postureTask);
   datastore().make<std::string>("ControlMode", "Position"); // entree dans le datastore
   datastore().make<std::string>("Coriolis", "Yes"); 
@@ -118,19 +120,21 @@ bool MyFirstController::run()
 
   // std::cout << "size : " << i << std::endl;
   // std::cout << "postureTargetFix size : " << postureTargetFixJVRC1.size() << std::endl;
-  if (ctlTime_ > 5.000) {
-    postureTask->target(postureTarget);
-    datastore().assign<std::string>("ControlMode", "Torque"); 
-  }
-  auto ctrl_mode = datastore().get<std::string>("ControlMode");
-  if(ctrl_mode.compare("Position") == 0)
-  {
-    return mc_control::MCController::run(mc_solver::FeedbackType::OpenLoop);
-  }
-  else {
-    return mc_control::MCController::run(mc_solver::FeedbackType::ClosedLoopIntegrateReal);
-  }
-  return false;
+ // if (ctlTime_ > 5.000) {
+ //   postureTask->target(postureTarget);
+ //   datastore().assign<std::string>("ControlMode", "Torque"); 
+ // }
+  //auto ctrl_mode = datastore().get<std::string>("ControlMode");
+ // if(ctrl_mode.compare("Position") == 0)
+ // {
+ //   return mc_control::MCController::run(mc_solver::FeedbackType::OpenLoop);
+ // }
+ // else {
+ //   return mc_control::MCController::run(mc_solver::FeedbackType::ClosedLoopIntegrateReal);
+ // }
+ // return false;
+  return mc_control::MCController::run();
+
 }
 
 void MyFirstController::reset(const mc_control::ControllerResetData & reset_data)

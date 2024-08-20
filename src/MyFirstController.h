@@ -16,7 +16,8 @@ struct MyFirstController_DLLAPI MyFirstController : public mc_control::MCControl
 
   void reset(const mc_control::ControllerResetData & reset_data) override;
 
-  std::shared_ptr<mc_tasks::PostureTask> postureTask ;
+ // std::shared_ptr<mc_tasks::PostureTask> postureTask ;
+  std::unique_ptr<mc_solver::DynamicsConstraint> MyDynamicsConstraint;
   
   std::map<std::string, std::vector<double>> postureTarget;
   std::map<std::string, std::vector<double>> postureTargetJVRC1;
